@@ -6,17 +6,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Check out"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: "Build unit test image"
       run: DOCKER_BUILDKIT=1 docker build -t rootlesskit:test-unit --target test-unit .
     - name: "Unit test"
       run: docker run --rm --privileged rootlesskit:test-unit
+  test-cross:
+    name: "Cross compilation test"
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: "Build binaries"
+      run: DOCKER_BUILDKIT=1 docker build -o /tmp/artifact --target cross-artifact .
   test-integration:
     name: "Integration test"
     runs-on: ubuntu-latest
     steps:
     - name: "Check out"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: "Build integration test image"
       run: DOCKER_BUILDKIT=1 docker build -t rootlesskit:test-integration --target test-integration .
     - name: "Integration test: exit-code"
@@ -91,10 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Check out"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: "Build integration test image"
-      # Docker 20.10.x builds RootlessKit with Go 1.16 (as of Docker 20.10.11), so we use Go 1.16 as well here.
-      run: DOCKER_BUILDKIT=1 docker build -t rootlesskit:test-integration-docker --target test-integration-docker --build-arg GO_VERSION=1.16 .
+      run: DOCKER_BUILDKIT=1 docker build -t rootlesskit:test-integration-docker --target test-integration-docker .
     - name: "Create a custom network to avoid IP confusion"
       run: docker network create custom
     - name: "Docker Integration test: net=slirp4netns, port-driver=builtin"
